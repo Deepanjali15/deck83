@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Deck 83 – A retro music player for your own songs</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#141311;--panel:#3a3d42;--panel2:#2b2d31;--silver:#c4c7cc;--purple:#b57bff;--ink:#e9e6df;--wood:#6b4226;--red:#d1422f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.55;padding:env(safe-area-inset-top,0) 14px env(safe-area-inset-bottom,0)}
+.wrap{max-width:640px;margin:0 auto;padding:28px 0 48px}
+nav{display:flex;justify-content:space-between;align-items:center;font-weight:700;color:var(--silver)}
+nav a{color:var(--silver);margin-left:16px;font-weight:500;text-decoration:none}
+nav a:hover{color:var(--purple)}
+.hero{margin:28px 0;background:linear-gradient(var(--panel),var(--panel2));border:2px solid #111;border-radius:14px;box-shadow:0 0 0 8px var(--wood),0 20px 40px #000a;padding:22px}
+.lcd{background:#0f0820;border:2px inset #000;border-radius:6px;padding:14px;font-family:'VT323',monospace;color:var(--purple);text-shadow:0 0 6px #b57bff88}
+.lcd .big{font-size:56px;line-height:1}.lcd .small{font-size:22px;color:#9a6fe0}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.btn{font:700 15px 'Space Grotesk',sans-serif;color:#111;background:linear-gradient(#d9dce0,#9da1a8);border:2px solid #111;border-bottom-width:5px;border-radius:6px;padding:12px 18px;text-decoration:none}
+.btn.main{background:linear-gradient(#d9b8ff,#b57bff)}
+.btn:active{border-bottom-width:2px;transform:translateY(3px)}
+a:focus-visible{outline:3px solid var(--purple);outline-offset:2px}
+h2{font-size:20px;margin:36px 0 8px}
+p{margin:0 0 10px;color:#cfccc5}
+dl{margin:0}dt{font-weight:700;margin-top:14px}dd{margin:2px 0 0;color:#cfccc5}
+footer{margin-top:40px;font-size:13px;color:#8d8a84}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav><span>Deck 83</span><span><a href="#about">About</a><a href="#faq">FAQ</a><a href="player.html">Log in</a></span></nav>
+  <section class="hero">
+    <div class="lcd"><div class="big">DECK 83</div><div class="small">Your songs. One retro tape deck.</div></div>
+    <div class="cta">
+      <a class="btn main" href="player.html#signup">Create account</a>
+      <a class="btn" href="player.html">Log in</a>
+    </div>
+  </section>
+  <h2 id="about">About</h2>
+  <p>Deck 83 is a music player styled like an 80s cassette deck, with spinning reels and a purple spectrum meter.</p>
+  <p>It comes with three built-in chiptune tracks. Add your own audio files and they appear in your playlist, ready to play, skip or delete.</p>
+  <h2>How it works</h2>
+  <p>Create a free account with your email, then log in from any device. Your songs are stored on the device where you add them, so they never get uploaded.</p>
+  <h2 id="faq">FAQ</h2>
+  <dl>
+    <dt>Do I need an account to listen?</dt><dd>Yes. Creating one takes a minute and only needs an email and a password.</dd>
+    <dt>Will my songs show up on my other devices?</dt><dd>No. Your account works everywhere, but songs stay on the device you added them on.</dd>
+    <dt>Can I play Spotify songs?</dt><dd>No. Deck 83 plays the built-in tracks and audio files from your own device.</dd>
+    <dt>Which file types work?</dt><dd>Any audio your browser can play, such as MP3, WAV, M4A and OGG.</dd>
+  </dl>
+  <footer>Deck 83 – a small retro music player.</footer>
+</div>
+</body>
+</html>

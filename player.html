@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Deck 83 – Retro Music Player</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1d1b19;--panel:#3a3d42;--panel2:#2b2d31;--silver:#c4c7cc;--amber:#b57bff;--amberdim:#2c1a4d;--red:#d1422f;--ink:#e9e6df;--wood:#6b4226;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141311}}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:'Space Grotesk',system-ui,sans-serif;display:flex;justify-content:center;padding:20px 12px}
+.deck{width:100%;max-width:560px;background:linear-gradient(var(--panel),var(--panel2));border:2px solid #111;border-radius:14px;box-shadow:0 0 0 8px var(--wood),0 20px 40px #000a;padding:18px}
+h1{font-size:15px;margin:0 0 12px;font-weight:700;letter-spacing:.04em;color:var(--silver);display:flex;justify-content:space-between}
+h1 span{color:var(--red)}
+.lcd{background:#0f0820;border:2px inset #000;border-radius:6px;padding:10px 12px;font-family:'VT323',monospace,monospace;color:var(--amber);text-shadow:0 0 6px #b57bff88}
+.title{font-size:30px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row{display:flex;justify-content:space-between;font-size:20px;color:#9a6fe0}
+canvas{display:block;width:100%;height:56px;margin-top:6px}
+.tape{margin:14px 0;background:#e3dac4;border-radius:8px;border:2px solid #111;padding:10px;color:#222;position:relative}
+.tape .label{background:#f6f0e0;border:1px solid #bbb;border-radius:4px;padding:4px 8px;font-family:'VT323',monospace,monospace;font-size:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-bottom:3px solid var(--red)}
+.window{margin:8px auto 0;height:62px;width:74%;background:#2a2118;border-radius:31px;border:2px solid #111;display:flex;justify-content:space-between;align-items:center;padding:0 12px}
+.reel{width:46px;height:46px;border-radius:50%;background:radial-gradient(circle,#ddd 0 9px,#111 10px 12px,#6a4a2a 13px);position:relative}
+.reel::after{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(#ddd 0 12%,transparent 12% 33%,#ddd 33% 45%,transparent 45% 66%,#ddd 66% 78%,transparent 78%);-webkit-mask:radial-gradient(circle,#000 0 11px,transparent 12px);mask:radial-gradient(circle,#000 0 11px,transparent 12px)}
+.spin .reel{animation:r 1.6s linear infinite}
+@keyframes r{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin .reel{animation:none}}
+.btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+button,.file{font:700 14px 'Space Grotesk',sans-serif;color:#111;background:linear-gradient(#d9dce0,#9da1a8);border:2px solid #111;border-bottom-width:5px;border-radius:6px;padding:12px 4px;cursor:pointer;text-align:center}
+button:active,.file:active{border-bottom-width:2px;transform:translateY(3px)}
+button:focus-visible,.file:focus-within,input:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+#play.on{background:linear-gradient(#d9b8ff,#b57bff)}
+.ctrl{display:flex;gap:12px;align-items:center;margin:14px 0 6px;font-size:14px;color:var(--silver)}
+input[type=range]{flex:1;accent-color:var(--amber)}
+.file{display:block;margin-top:10px;position:relative}
+.file input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+ul{list-style:none;margin:12px 0 0;padding:0;max-height:200px;overflow-y:auto}
+li button{width:100%;text-align:left;display:flex;justify-content:space-between;background:transparent;border:0;border-bottom:1px solid #1118;border-radius:0;color:var(--ink);font-weight:500;padding:9px 6px}
+li button.cur{color:var(--amber);background:#0f0820}
+.hint{font-size:12px;color:#9a9da3;margin:10px 0 0}
+[hidden]{display:none!important}
+li{display:flex}li button:first-child{flex:1}
+li button.del{width:auto;flex:none;padding:9px 14px;color:#ff8aa8;justify-content:center}
+#auth label{display:block;font-size:13px;color:var(--silver);margin:10px 0 4px}
+#auth input{width:100%;font:500 16px 'Space Grotesk',sans-serif;padding:10px;border-radius:6px;border:2px inset #000;background:#0f0820;color:var(--ink)}
+#auth .btns{grid-template-columns:1fr;margin-top:14px}
+.link{background:none;border:0;color:var(--amber);text-decoration:underline;margin-top:10px;padding:6px;font-weight:500}
+#err{min-height:18px;color:#ff8aa8;font-size:13px;margin-top:8px}
+.userbar{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--silver);margin:-4px 0 12px}
+.userbar button{padding:4px 10px;border-bottom-width:3px;font-size:12px}
+</style>
+</head>
+<body>
+<section class="deck" id="auth" hidden>
+  <h1>DECK 83 <span>● LOCKED</span></h1>
+  <div class="lcd"><div class="title" id="atitle">WELCOME BACK</div></div>
+  <form id="aform">
+    <label for="un">Email</label><input id="un" type="email" autocomplete="email" required>
+    <label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password" required minlength="6">
+    <div id="err" role="alert"></div>
+    <div class="btns"><button id="asub" type="submit">Log in</button></div>
+  </form>
+  <button class="link" id="atoggle" type="button">New here? Create an account</button>
+  <p class="hint">Your account works on any device. Songs you add stay on the device you add them on.</p>
+</section>
+<main class="deck" id="app" hidden>
+  <h1>DECK 83 <span id="rec">● STOP</span></h1>
+  <div class="userbar"><span>Signed in as <b id="who"></b></span><button id="logout" type="button">Log out</button></div>
+  <div class="lcd">
+    <div class="title" id="title">INSERT TAPE</div>
+    <div class="row"><span id="kind">--</span><span id="time">00:00</span></div>
+    <canvas id="viz" width="480" height="56"></canvas>
+  </div>
+  <div class="tape" id="tape">
+    <div class="label" id="label">Side A</div>
+    <div class="window"><div class="reel"></div><div class="reel"></div></div>
+  </div>
+  <div class="btns">
+    <button id="prev" aria-label="Previous track">⏮ Prev</button>
+    <button id="play" aria-label="Play or pause">▶ Play</button>
+    <button id="stop" aria-label="Stop">■ Stop</button>
+    <button id="next" aria-label="Next track">Next ⏭</button>
+  </div>
+  <div class="ctrl"><label for="vol">Volume</label><input id="vol" type="range" min="0" max="1" step="0.01" value="0.7"></div>
+  <label class="file">+ Add your own songs<input id="files" type="file" accept="audio/*" multiple></label>
+  <ul id="list"></ul>
+  <p class="hint" id="msg">Three chiptune tracks are built in. Songs you add are saved on this device only.</p>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var AC=window.AudioContext||window.webkitAudioContext,ctx,master,an,audioEl,mediaSrc,synthGain;
+var N=function(n){return 440*Math.pow(2,(n-69)/12)};
+// built-in chiptune tracks: tempo, wave, lead notes (0 = rest), bass notes
+var tracks=[
+ {name:"Neon Arcade",kind:"SYNTH",bpm:132,wave:"square",lead:[72,0,76,79,0,76,72,0,74,0,77,81,0,77,74,0],bass:[48,48,55,55,53,53,50,50]},
+ {name:"Night Drive",kind:"SYNTH",bpm:104,wave:"sawtooth",lead:[69,0,0,72,0,76,0,72,67,0,0,71,0,74,0,71],bass:[45,45,45,45,43,43,43,43]},
+ {name:"Pixel Sunrise",kind:"SYNTH",bpm:148,wave:"triangle",lead:[67,71,74,79,74,71,67,71,69,72,76,81,76,72,69,72],bass:[43,50,43,50,45,52,45,52]}
+];
+var cur=-1,playing=false,step=0,nextT=0,timer=null,startAt=0,pausedAt=0;
+var queue=tracks.slice();
+function init(){
+  if(ctx)return;
+  ctx=new AC();master=ctx.createGain();an=ctx.createAnalyser();an.fftSize=128;
+  master.gain.value=+$('vol').value;master.connect(an);an.connect(ctx.destination);
+  synthGain=ctx.createGain();synthGain.connect(master);
+  audioEl=new Audio();audioEl.crossOrigin='anonymous';
+  mediaSrc=ctx.createMediaElementSource(audioEl);mediaSrc.connect(master);
+  audioEl.addEventListener('ended',function(){go(1)});
+}
+function note(f,t,d,type,v){
+  var o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.value=f;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+d);
+  o.connect(g);g.connect(synthGain);o.start(t);o.stop(t+d+.02);
+}
+function sched(){
+  var tr=queue[cur];if(!tr||!tr.lead)return;
+  var sd=60/tr.bpm/2;
+  while(nextT<ctx.currentTime+.2){
+    var n=tr.lead[step%tr.lead.length];
+    if(n)note(N(n),nextT,sd*1.6,tr.wave,.16);
+    if(step%2===0)note(N(tr.bass[(step/2)%tr.bass.length|0]),nextT,sd*1.9,'triangle',.28);
+    if(step%4===0)note(120,nextT,.08,'square',.07);
+    nextT+=sd;step++;
+  }
+}
+function load(i){
+  init();ctx.resume();cur=(i+queue.length)%queue.length;var tr=queue[cur];
+  clearInterval(timer);audioEl.pause();
+  $('title').textContent=tr.name.toUpperCase();$('kind').textContent=tr.kind;
+  $('label').textContent='Side A – '+tr.name;
+  [].forEach.call($('list').querySelectorAll('li > button:first-child'),function(b,k){b.classList.toggle('cur',k===cur)});
+  if(tr.lead){step=0;nextT=ctx.currentTime+.05;startAt=ctx.currentTime;timer=setInterval(sched,50);sched();}
+  else{audioEl.src=tr.url;audioEl.play();}
+  setPlaying(true);
+}
+function setPlaying(p){
+  playing=p;$('play').textContent=p?'❚❚ Pause':'▶ Play';$('play').classList.toggle('on',p);
+  $('tape').classList.toggle('spin',p);$('rec').textContent=p?'● PLAY':'● STOP';
+}
+function pause(){
+  var tr=queue[cur];if(!tr)return;
+  if(tr.lead){clearInterval(timer);pausedAt=ctx.currentTime-startAt;ctx.suspend();}else audioEl.pause();
+  setPlaying(false);
+}
+function resume(){
+  var tr=queue[cur];ctx.resume();
+  if(tr.lead){startAt=ctx.currentTime-pausedAt;nextT=ctx.currentTime+.05;timer=setInterval(sched,50);}else audioEl.play();
+  setPlaying(true);
+}
+function stop(){
+  if(!ctx)return;clearInterval(timer);if(audioEl)audioEl.pause();
+  if(queue[cur]&&queue[cur].lead){ctx.suspend();pausedAt=0;step=0;}
+  else if(audioEl)audioEl.currentTime=0;
+  setPlaying(false);$('time').textContent='00:00';
+}
+function go(d){if(cur<0)load(0);else load(cur+d)}
+function fmt(s){s=Math.max(0,s|0);return String(s/60|0).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function renderList(){
+  var ul=$('list');ul.innerHTML='';
+  queue.forEach(function(t,i){
+    var li=document.createElement('li'),b=document.createElement('button');
+    var a=document.createElement('span'),k=document.createElement('span');
+    a.textContent=t.name;k.textContent=t.kind;b.appendChild(a);b.appendChild(k);
+    if(i===cur)b.className='cur';
+    b.onclick=function(){load(i)};li.appendChild(b);
+    if(t.kind==='FILE'){var d=document.createElement('button');d.className='del';d.textContent='✕';d.setAttribute('aria-label','Delete '+t.name);d.onclick=function(){del(i)};li.appendChild(d);}
+    ul.appendChild(li);
+  });
+}
+$('play').onclick=function(){
+  if(cur<0){load(0);return}
+  playing?pause():resume();
+};
+$('stop').onclick=stop;$('prev').onclick=function(){go(-1)};$('next').onclick=function(){go(1)};
+$('vol').oninput=function(e){if(master)master.gain.value=+e.target.value};
+$('files').onchange=function(e){
+  var fs=[].slice.call(e.target.files);e.target.value='';
+  fs.forEach(addSong);
+};
+document.addEventListener('keydown',function(e){
+  if(e.target.tagName==='INPUT')return;
+  if(e.code==='Space'){e.preventDefault();$('play').click()}
+  if(e.code==='ArrowRight')go(1);if(e.code==='ArrowLeft')go(-1);
+});
+// spectrum + clock
+var cv=$('viz'),c2=cv.getContext('2d'),data=new Uint8Array(64);
+function draw(){
+  requestAnimationFrame(draw);
+  c2.clearRect(0,0,cv.width,cv.height);
+  if(an)an.getByteFrequencyData(data);
+  var bars=24,w=cv.width/bars;
+  for(var i=0;i<bars;i++){
+    var v=playing&&an?data[i+1]/255:0,h=Math.round(v*7);
+    for(var j=0;j<7;j++){
+      c2.fillStyle=j<h?(j>5?'#ff5fa8':'#b57bff'):'#22143d';
+      c2.fillRect(i*w+2,cv.height-(j+1)*8,w-4,6);
+    }
+  }
+  if(playing&&queue[cur]){
+    var t=queue[cur].lead?ctx.currentTime-startAt:audioEl.currentTime;
+    $('time').textContent=fmt(t);
+  }
+}
+function del(i){
+  var t=queue[i];if(!t)return;
+  if(i===cur){stop();cur=-1;$('title').textContent='INSERT TAPE';$('kind').textContent='--';$('label').textContent='Side A';}
+  else if(i<cur)cur--;
+  if(t.id!=null)dbDel(t.id);
+  try{URL.revokeObjectURL(t.url)}catch(e){}
+  queue.splice(i,1);renderList();
+}
+/* storage + accounts (local to this browser) */
+var DB=null,user=null,signup=false;
+function lsGet(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
+function openDB(){return new Promise(function(res){
+  try{var r=indexedDB.open('deck83',1);
+  r.onupgradeneeded=function(){r.result.createObjectStore('songs',{keyPath:'id',autoIncrement:true}).createIndex('user','user')};
+  r.onsuccess=function(){DB=r.result;res()};r.onerror=function(){res()};}catch(e){res()}})}
+function dbAll(u){return new Promise(function(res){
+  if(!DB)return res([]);
+  try{var q=DB.transaction('songs').objectStore('songs').index('user').getAll(u);q.onsuccess=function(){res(q.result)};q.onerror=function(){res([])}}catch(e){res([])}})}
+function dbAdd(rec){return new Promise(function(res){
+  if(!DB)return res(null);
+  try{var q=DB.transaction('songs','readwrite').objectStore('songs').add(rec);q.onsuccess=function(){res(q.result)};q.onerror=function(){res(null)}}catch(e){res(null)}})}
+function dbDel(id){try{DB.transaction('songs','readwrite').objectStore('songs').delete(id)}catch(e){}}
+function addSong(f){
+  var name=f.name.replace(/\.[^.]+$/,'');
+  dbAdd({user:user,name:name,blob:f}).then(function(id){
+    queue.push({id:id,name:name,kind:'FILE',url:URL.createObjectURL(f)});renderList();
+    if(id==null)$('msg').textContent='This browser blocked storage, so “'+name+'” will be gone when you close the page.';
+  });
+}
+var sb=null;
+try{sb=supabase.createClient(window.DECK83_CONFIG.url,window.DECK83_CONFIG.anonKey)}catch(e){}
+function setMode(s){
+  signup=s;
+  $('atitle').textContent=s?'NEW ACCOUNT':'WELCOME BACK';
+  $('asub').textContent=s?'Create account':'Log in';
+  $('atoggle').textContent=s?'Have an account? Log in':'New here? Create an account';
+  $('pw').autocomplete=s?'new-password':'current-password';$('err').textContent='';
+}
+function showAuth(){$('app').hidden=true;$('auth').hidden=false;setMode(location.hash==='#signup');}
+function enter(u){
+  user=u.id;$('who').textContent=u.email;$('auth').hidden=true;$('app').hidden=false;
+  dbAll(user).then(function(rows){
+    queue=tracks.slice().concat(rows.map(function(r){return {id:r.id,name:r.name,kind:'FILE',url:URL.createObjectURL(r.blob)}}));
+    cur=-1;renderList();
+  });
+}
+$('atoggle').onclick=function(){setMode(!signup)};
+$('aform').onsubmit=function(e){
+  e.preventDefault();
+  if(!sb){$('err').textContent='Add your Supabase URL and key in config.js first.';return}
+  var em=$('un').value.trim(),p=$('pw').value;$('asub').disabled=true;
+  var req=signup?sb.auth.signUp({email:em,password:p}):sb.auth.signInWithPassword({email:em,password:p});
+  req.then(function(r){
+    $('asub').disabled=false;
+    if(r.error){$('err').textContent=r.error.message;return}
+    if(r.data.session){$('pw').value='';enter(r.data.user)}
+    else $('err').textContent='Check your email to confirm your account, then log in.';
+  });
+};
+$('logout').onclick=function(){
+  stop();queue.forEach(function(t){if(t.kind==='FILE')try{URL.revokeObjectURL(t.url)}catch(e){}});
+  cur=-1;queue=tracks.slice();user=null;if(sb)sb.auth.signOut();
+  $('title').textContent='INSERT TAPE';$('kind').textContent='--';$('label').textContent='Side A';
+  $('un').value='';showAuth();
+};
+draw();
+openDB().then(function(){
+  if(!sb)return showAuth();
+  sb.auth.getSession().then(function(r){var x=r.data&&r.data.session;if(x)enter(x.user);else showAuth()});
+});
+})();
+</script>
+</body>
+</html>
