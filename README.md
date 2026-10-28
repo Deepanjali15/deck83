@@ -50,20 +50,6 @@ config.js    Your Supabase URL and anon key
 - **Songs** you add are stored in your browser on the device where you add them. They are never uploaded, so they do not appear on your other devices.
 - **Built-in tracks** are made with the Web Audio API.
 
-## Set up your own copy
-
-1. **Create a Supabase project** at supabase.com.
-2. **Email sign-in:** under Authentication, then Sign In / Providers, then Email, turn off *Confirm email* if you want people to log in right after signing up.
-3. **Copy your keys** from Project Settings, then API Keys: the Project URL and the `anon` public key.
-4. **Edit `config.js`:**
-   ```js
-   window.DECK83_CONFIG = { url: "https://YOUR-PROJECT-ID.supabase.co", anonKey: "YOUR-ANON-KEY" };
-   ```
-5. **Deploy** `index.html`, `player.html`, and `config.js` together to Netlify (drag the folder onto app.netlify.com/drop).
-6. **Set the Site URL** in Supabase, under Authentication, then URL Configuration, to your Netlify address.
-
-> Never put a `service_role` or secret key in `config.js`. Only the `anon` key belongs there.
-
 ## Good to know
 
 - Deck 83 plays built-in tracks and audio files from your device. It does not stream from Spotify or other services.
