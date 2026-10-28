@@ -2,7 +2,7 @@
 
 A retro cassette-style music player. Play built-in chiptune tracks or add your own songs.
 
-Live site: https://your-site.netlify.app
+Live site: https://stalwart-florentine-ee5f6c.netlify.app
 
 ## Features
 - Email accounts that work on any device (Supabase)
